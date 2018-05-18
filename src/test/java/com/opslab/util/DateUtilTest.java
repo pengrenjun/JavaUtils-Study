@@ -235,7 +235,7 @@ public class DateUtilTest {
         System.out.println(DateUtil.subDay("2015-01-05 13:00:00", "2015-01-06 10:00:00"));
         System.out.println(DateUtil.subDay("2015-01-05 13:00:00", "2015-03-05 13:00:00"));
         System.out.println(DateUtil.subDay("2015-01-05 13:00:00", "2015-01-07 13:00:00"));
-        System.out.println(DateUtil.subDay("2015-01-05 13:00:00", "2015-01-08 13:00:00"));
+        System.out.println(DateUtil.subDay("2015-01-05 13:00:00", "2017-01-08 13:00:00"));
     }
 
     @Test

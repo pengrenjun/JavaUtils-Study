@@ -655,7 +655,6 @@ public final class DateUtil {
 
     /**
      * 返回俩个时间在时间段(例如每天的08:00-18:00)的时长-单位秒
-     *
      * @param startDate
      * @param endDate
      * @param timeBurst 只就按该时间段内的08:00-18:00时长

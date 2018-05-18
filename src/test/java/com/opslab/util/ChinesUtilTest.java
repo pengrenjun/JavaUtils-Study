@@ -49,5 +49,10 @@ public class ChinesUtilTest extends TestCase {
         assertEquals("判断乱码有问题", true, ChinesUtil.isMessyCode(str1));
     }
 
+    public void testGetPingYin(){
+        String q="浏览器";
+        System.out.println(ChinesUtil.getPingYin(q));
+    }
+
 
 }
