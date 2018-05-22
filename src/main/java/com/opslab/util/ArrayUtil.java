@@ -114,17 +114,4 @@ public class ArrayUtil  {
     }
 
 
-    public static void main(String[] args) {
-        Object[] str1={1,4,2,5,6,3,5};
-
-        Object[] str2={1,4,2,5,6,5,3};
-
-
-
-
-
-
-
-
-    }
 }

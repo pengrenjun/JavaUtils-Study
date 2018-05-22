@@ -26,14 +26,14 @@ public final class PropertiesUtil {
     }
 
     /**
-     * 根据Key读取Value
+     * 根据Key读取配置文件的Value
      *
      * @param filePath 属性文件
      * @param key      需要读取的属性
      */
     public final static String GetValueByKey(String filePath, String key) {
         Properties pps = new Properties();
-        try (InputStream in = new BufferedInputStream(new FileInputStream(filePath))) {
+        try (InputStream in = StreamUtil.resourceStream(filePath)) {
             pps.load(in);
             return pps.getProperty(key);
         } catch (IOException e) {
@@ -42,6 +42,11 @@ public final class PropertiesUtil {
         }
     }
 
+    /**
+     * 将配置文件的键和值转为Map集合
+     * @param in
+     * @return
+     */
     public final static Map<String,String> properties(InputStream in){
         Map<String,String> map = new HashMap<>();
         Properties pps = new Properties();
@@ -59,7 +64,7 @@ public final class PropertiesUtil {
         return map;
     }
     /**
-     * 读取Properties的全部信息
+     * 读取Properties的全部信息(Map集合)
      *
      * @param filePath 读取的属性文件
      * @return 返回所有的属性 key:value<>key:value
@@ -67,7 +72,7 @@ public final class PropertiesUtil {
     public final static Map<String,String> GetAllProperties(String filePath) throws IOException {
         Map<String,String> map = new HashMap<>();
         Properties pps = new Properties();
-        try (InputStream in = new BufferedInputStream(new FileInputStream(filePath))) {
+        try (InputStream in =StreamUtil.resourceStream(filePath)) {
             return properties(in);
         }catch (IOException e){
             logger.error("load properties error");
@@ -75,24 +80,67 @@ public final class PropertiesUtil {
         return map;
     }
 
-    /**
-     * 写入Properties信息
-     *
-     * @param filePath 写入的属性文件
-     * @param pKey     属性名称
-     * @param pValue   属性值
-     */
-    public final static void WriteProperties(String filePath, String pKey, String pValue) throws IOException {
-        Properties props = new Properties();
 
-        props.load(new FileInputStream(filePath));
-        // 调用 Hashtable 的方法 put，使用 getProperty 方法提供并行性。
-        // 强制要求为属性的键和值使用字符串。返回值是 Hashtable 调用 put 的结果。
-        OutputStream fos = new FileOutputStream(filePath);
-        props.setProperty(pKey, pValue);
-        // 以适合使用 load 方法加载到 Properties 表中的格式，
-        // 将此 Properties 表中的属性列表（键和元素对）写入输出流
-        props.store(fos, "Update '" + pKey + "' value");
+    /**
+     * 传递键值对的Map，保存更新properties文件
+     *
+     * @param fileName
+     *            文件名(放在resource源包目录下)，需要后缀
+     * @param keyValueMap
+     *            键值对Map
+     */
+    public static void updateProperties(String fileName,Map<String, String> keyValueMap) {
+        // InputStream
+        // inputStream=PropertiesUtil.class.getClassLoader().getResourceAsStream(fileName);//输入流
+        // 文件的路径
+        String filePath = PropertiesUtil.class.getClassLoader()
+                .getResource(fileName).getFile();
+        System.out.println("propertiesPath:" + filePath);
+        Properties props = new Properties();
+        BufferedReader br = null;
+        BufferedWriter bw = null;
+
+        try {
+            // 从输入流中读取属性列表（键和元素对）
+            br = new BufferedReader(new InputStreamReader(new FileInputStream(filePath)));
+            props.load(br);
+            br.close();
+
+            // 写入属性文件
+            bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filePath)));
+             //props.clear();// 清空旧的文件
+            Map<String,String> oldMap=GetAllProperties(fileName);
+            //sava
+            for(String key:oldMap.keySet()){
+                props.setProperty(key,oldMap.get(key));
+            }
+            //update
+            for (String key : keyValueMap.keySet()){
+                props.setProperty(key, keyValueMap.get(key));
+            }
+
+            props.store(bw, "");
+            bw.close();
+        } catch (IOException e) {
+            System.err.println("Visit " + filePath + " for updating " + ""+ " value error");
+        } finally {
+            try {
+                br.close();
+                bw.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static void main(String[] args) throws IOException {
+
+        Map<String,String> map=new HashMap<>();
+        map.put("asd","asdasd");
+        updateProperties("0opslab-default.properties",map);
+
+        System.out.println(GetValueByKey("0opslab-default.properties","userName"));
+
 
     }
 

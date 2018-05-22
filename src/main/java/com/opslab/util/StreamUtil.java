@@ -1,6 +1,7 @@
 package com.opslab.util;
 
 import java.io.*;
+import java.net.URL;
 
 /**
  * 流相关的操作方法封装
@@ -71,6 +72,34 @@ public final class StreamUtil {
             throw new RuntimeException(e);
         }
     }
+
+    /**
+     * 通过连接中读取数据(输入流)
+     * @param path
+     * @return
+     * @throws RuntimeException
+     */
+    private static InputStream getConfigStream(final String path) throws RuntimeException {
+        try {
+            URL url = new URL(path);
+            return url.openStream();
+        } catch (IOException e) {
+            throw new RuntimeException("Unable to open file: " + path);
+        }
+    }
+
+    /**
+     * 获取资源流(InputStream)
+     * 通过URl
+     * @param path
+     * @return
+     * @throws IOException
+     */
+    public static InputStream resourceStream(final String path) throws IOException {
+        URL asResource = ConfigUrlUtil.findAsResource(path);
+        return asResource.openStream();
+    }
+
 
 
 }
