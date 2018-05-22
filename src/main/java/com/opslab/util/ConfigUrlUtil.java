@@ -78,17 +78,4 @@ public class ConfigUrlUtil {
     }
 
 
-
-    public static void main(String[] args) throws IOException {
-
-        System.out.println(getConfigProperty("0opslab-default.properties","mail.sender.username"));
-
-        System.out.println(resourcePath("0opslab-default.properties"));
-
-        Map<String,String> map=new HashMap<>();
-        map.put("mail.sender.username","123@qwe.com");
-
-    }
-
-
 }

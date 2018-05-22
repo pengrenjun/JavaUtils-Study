@@ -133,15 +133,5 @@ public final class PropertiesUtil {
         }
     }
 
-    public static void main(String[] args) throws IOException {
-
-        Map<String,String> map=new HashMap<>();
-        map.put("asd","asdasd");
-        updateProperties("0opslab-default.properties",map);
-
-        System.out.println(GetValueByKey("0opslab-default.properties","userName"));
-
-
-    }
 
 }
