@@ -710,11 +710,14 @@ public final class FileUtil {
      */
     public static void writeDate(String filePathAndName,Object obj) throws IOException {
         File file = new File(filePathAndName);
+        if(!file.exists()){
+           file.createNewFile();
+        }
         FileOutputStream fos ;
         ObjectOutputStream oos ;
         fos = new FileOutputStream(file);
         oos = new ObjectOutputStream(fos);
-        oos.writeObject(obj);
+        oos.writeUnshared(obj);
         oos.flush();
         oos.close();
     }
@@ -727,7 +730,7 @@ public final class FileUtil {
     public static Object readDate(String filePathAndName) throws IOException, ClassNotFoundException {
         FileInputStream fileInputStream = new FileInputStream(filePathAndName);
         ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
-        Object obj = (Object) objectInputStream.readObject();
+        Object obj = objectInputStream.readObject();
         objectInputStream.close();
         fileInputStream.close();
         return obj;
