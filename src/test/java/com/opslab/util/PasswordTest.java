@@ -7,13 +7,13 @@ import junit.framework.TestCase;
  */
 public class PasswordTest extends TestCase {
     public void testMd5() throws Exception {
-        System.out.println(Password.md5("12345"));
+        System.out.println(PasswordUtil.md5.encrypt("12345"));
     }
 
     public void testIsSec() throws Exception {
-        System.out.println(Password.isSec("12345"));
-        System.out.println(Password.isSec("12345aa**"));
-        System.out.println(Password.isSec("12345Aa**"));
+        System.out.println(PasswordUtil.isSec("12345"));
+        System.out.println(PasswordUtil.isSec("12345aa**"));
+        System.out.println(PasswordUtil.isSec("12345Aa**"));
     }
 
 }

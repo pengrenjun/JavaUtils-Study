@@ -701,4 +701,40 @@ public final class FileUtil {
         String fileName=file.getName();
         return fileName.substring(fileName.indexOf(".")+1);
     }
+
+
+    /**
+     * 向磁盘文件中写入数据
+     * @param filePathAndName 文件路径及名称
+     * @param obj      文件数据
+     */
+    public static void writeDate(String filePathAndName,Object obj) throws IOException {
+        File file = new File(filePathAndName);
+        FileOutputStream fos ;
+        ObjectOutputStream oos ;
+        fos = new FileOutputStream(file);
+        oos = new ObjectOutputStream(fos);
+        oos.writeObject(obj);
+        oos.flush();
+        oos.close();
+    }
+
+    /**
+     * 从磁盘文件中读取数据
+     * @param filePathAndName
+     * @return
+     */
+    public static Object readDate(String filePathAndName) throws IOException, ClassNotFoundException {
+        FileInputStream fileInputStream = new FileInputStream(filePathAndName);
+        ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
+        Object obj = (Object) objectInputStream.readObject();
+        objectInputStream.close();
+        fileInputStream.close();
+        return obj;
+    }
+
+
+
+
+
 }
