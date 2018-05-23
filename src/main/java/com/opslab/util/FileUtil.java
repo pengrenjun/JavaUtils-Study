@@ -736,6 +736,11 @@ public final class FileUtil {
         return obj;
     }
 
+    public static void main(String[] args) {
+
+        System.out.println(FileUtil.fileMD5(new File("flagAndpw.properties")));
+    }
+
 
 
 
