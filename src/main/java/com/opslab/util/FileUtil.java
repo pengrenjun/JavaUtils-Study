@@ -4,6 +4,7 @@ import com.opslab.util.algorithmImpl.FileTypeImpl;
 import com.opslab.util.algorithmImpl.FileImpl;
 
 import java.io.*;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.FileNameMap;
 import java.net.URLConnection;
@@ -706,7 +707,7 @@ public final class FileUtil {
     /**
      * 向磁盘文件中写入数据
      * @param filePathAndName 文件路径及名称
-     * @param obj      文件数据
+     * @param obj      文件数据(任意的数据类型)
      */
     public static void writeDate(String filePathAndName,Object obj) throws IOException {
         File file = new File(filePathAndName);
@@ -715,9 +716,9 @@ public final class FileUtil {
         }
         FileOutputStream fos ;
         ObjectOutputStream oos ;
-        fos = new FileOutputStream(file);
+        fos = new FileOutputStream(file,true);
         oos = new ObjectOutputStream(fos);
-        oos.writeUnshared(obj);
+        oos.writeObject(obj);
         oos.flush();
         oos.close();
     }
@@ -736,10 +737,43 @@ public final class FileUtil {
         return obj;
     }
 
-    public static void main(String[] args) throws IOException {
-        File file=new File("flagAndSecretKey_83A9FBA1844549DEA6A6FF0CCC59823C.text");
 
-        System.out.println(FileUtil.fileMD5(file));
+    /**
+     * 根据文件名称获取文件的大小
+     * @param filePathName
+     * @return
+     * @throws IllegalAccessException
+     */
+    public static String getFileLength(String filePathName) throws IllegalAccessException {
+         return getFileLength(new File(filePathName));
+    }
+
+    /**
+     * 获取文件的大小
+     * @param file
+     * @return
+     * @throws IllegalAccessException
+     */
+    public static String getFileLength(File file) throws IllegalAccessException {
+
+        if(file.exists()&&file.isFile()){
+            return ConvertUtil.getFormatSize(file.length());
+        }
+        throw new IllegalAccessException(file.getName()+"文件不存在");
+    }
+
+
+
+
+    public static void main(String[] args) throws IOException, IllegalAccessException, ClassNotFoundException {
+        /*File file=new File("D:\\program Files\\jetty-distribution-9.4.8.v20171121.zip");
+        System.out.println(FileUtil.getFileLength(file));
+*/
+      //  FileUtil.writeDate("D:\\program Files\\test.text","245");
+        Object obj= FileUtil.readDate("D:\\program Files\\test.text");
+        System.out.println(obj);
+
+ /*       System.out.println(FileUtil.fileMD5(file));
 
         System.out.println(FileUtil.countLines(file));
 
@@ -749,7 +783,7 @@ public final class FileUtil {
 
         System.out.println(FileUtil.mimeType(file.getName()));
 
-        System.out.println(FileUtil.fileType(file));
+        System.out.println(FileUtil.fileType(file));*/
 
 
     }
