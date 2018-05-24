@@ -63,7 +63,7 @@ public final class FileUtil {
     }
     /**
      * 获取文件的行数
-     *
+     * 默认情况下，行编号从0开始。
      * @param file 统计的文件
      * @return 文件行数
      */
@@ -736,9 +736,22 @@ public final class FileUtil {
         return obj;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
+        File file=new File("flagAndSecretKey_83A9FBA1844549DEA6A6FF0CCC59823C.text");
 
-        System.out.println(FileUtil.fileMD5(new File("flagAndpw.properties")));
+        System.out.println(FileUtil.fileMD5(file));
+
+        System.out.println(FileUtil.countLines(file));
+
+        List<String> list=FileUtil.lines(file);
+
+        System.out.println(list);
+
+        System.out.println(FileUtil.mimeType(file.getName()));
+
+        System.out.println(FileUtil.fileType(file));
+
+
     }
 
 

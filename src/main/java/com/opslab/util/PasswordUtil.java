@@ -17,7 +17,7 @@ import java.util.Map;
 /**
  * 提供密码相关的工具类
  */
-public final class PasswordUtil  {
+public final class PasswordUtil {
 
     /**
      * 必选包含数字、大写字母、小写字母、特殊字符，长度在8到15位
@@ -29,40 +29,44 @@ public final class PasswordUtil  {
     /**
      * 判断一个密码是否健壮
      * 必选包含数字、大写字母、小写字母、特殊字符，长度在8到15位
+     *
      * @param password
      * @return
      */
 
-    public final static  boolean isSec(String password){
-        return RegUtil.isMatche(password,SEC_PASSWORD);
+    public final static boolean isSec(String password) {
+        return RegUtil.isMatche(password, SEC_PASSWORD);
     }
 
     /**
      * Base64加密技术
+     *
      * @Description 采用Base64编码具有不可读性，即所编码的数据不会被人用肉眼所直接看到。
-       Base64编码一般用于url的处理，或者说任何你不想让普通人一眼就知道是啥的东西都可以用Base64编码处理后再发布在网络上
+     * Base64编码一般用于url的处理，或者说任何你不想让普通人一眼就知道是啥的东西都可以用Base64编码处理后再发布在网络上
      * @return
      */
-     static  class  Base64enCrypt {
+    static class Base64enCrypt {
         /**
          * Base64加密
+         *
          * @param pwstr
          * @return
          */
-         public static String  encrypt(String pwstr){
-             byte[] encodeBytes = Base64.getEncoder().encode(pwstr.getBytes());
-             return new String(encodeBytes);
-         }
+        public static String encrypt(String pwstr) {
+            byte[] encodeBytes = Base64.getEncoder().encode(pwstr.getBytes());
+            return new String(encodeBytes);
+        }
 
         /**
          * Base64解密
+         *
          * @param pwCode
          * @return
          */
-         public static  String decode(String pwCode){
-             byte[] decodeBytes = Base64.getDecoder().decode(pwCode.getBytes());
-             return new String(decodeBytes);
-         }
+        public static String decode(String pwCode) {
+            byte[] decodeBytes = Base64.getDecoder().decode(pwCode.getBytes());
+            return new String(decodeBytes);
+        }
 
     }
 
@@ -72,9 +76,9 @@ public final class PasswordUtil  {
      * 消息摘要（Message Digest）又称为数字摘要(Digital Digest)。
      * 它是一个唯一对应一个消息或文本的固定长度的值，它由一个单向Hash加密函数对消息进行作用而产生
      */
-    static  class  md5{
+    static class md5 {
 
-        public final static String encrypt(String password){
+        public final static String encrypt(String password) {
             MessageDigest md;
             try {
                 // 生成一个MD5加密计算摘要
@@ -96,8 +100,8 @@ public final class PasswordUtil  {
     /**
      * 安全散列算法
      */
-    static class  SHA{
-        public final static String encrypt(String password){
+    static class SHA {
+        public final static String encrypt(String password) {
 
             MessageDigest md;
             try {
@@ -121,9 +125,11 @@ public final class PasswordUtil  {
     /**
      * 对称加密解密 DES 密码及密钥暂且存在项目文件中(密钥保存在text文件中,密码与加密后的密码,密钥所在文件路径保存在配置文件中)
      */
-    static class DES{
+    static class DES {
 
-        /**DES加密*/
+        /**
+         * DES加密
+         */
         public static String encrypt(String password) throws NoSuchPaddingException, NoSuchAlgorithmException, IOException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException, InvalidKeySpecException {
 
             Cipher cipher;
@@ -145,68 +151,69 @@ public final class PasswordUtil  {
             byte[] resultBytes = cipher.doFinal(password.getBytes());
 
             //进行DES加密
-            String pwCode=HexBin.encode(resultBytes);
+            String pwCode = HexBin.encode(resultBytes);
             //保存密钥及原密码和加密处理的密码
-            savakeyAndpw(secretKey,password,pwCode);
-            System.out.println(password+" 加密后的编码为: "+pwCode);
+            savakeyAndpw(secretKey, password, pwCode);
+            System.out.println(password + " 加密后的编码为: " + pwCode);
             return pwCode;
         }
-          /**DES解密*/
-           public static String decode(String pwCode) throws NoSuchPaddingException, NoSuchAlgorithmException, IOException, ClassNotFoundException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
+
+        /**
+         * DES解密
+         */
+        public static String decode(String pwCode) throws NoSuchPaddingException, NoSuchAlgorithmException, IOException, ClassNotFoundException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
 
             Cipher cipher = Cipher.getInstance("DES");
 
             //通过配置文件获取唯一标识
-            String onlyFlag=null;
-            String filePathName=null;
+            String onlyFlag = null;
+            String filePathName = null;
 
-            Map<String,String> flagAndpwCodeMap=  PropertiesUtil.GetAllProperties("flagAndpwCode.properties");
-            for(String flag:flagAndpwCodeMap.keySet()){
-              String val=flagAndpwCodeMap.get(flag);
-              if(val.equals(pwCode)){
-                  onlyFlag=flag;
-              }
-           }
+            Map<String, String> flagAndpwCodeMap = PropertiesUtil.GetAllProperties("flagAndpwCode.properties");
+            for (String flag : flagAndpwCodeMap.keySet()) {
+                String val = flagAndpwCodeMap.get(flag);
+                if (val.equals(pwCode)) {
+                    onlyFlag = flag;
+                }
+            }
 
             //读取密钥所在文件名称
-            Map<String,String> flagAndfileNameMap=  PropertiesUtil.GetAllProperties("flagAndfilePath.properties");
-               for(String key:flagAndfileNameMap.keySet()){
-                   if(key.equals(onlyFlag)){
-                       filePathName=flagAndfileNameMap.get(key);
-                   }
-               }
+            Map<String, String> flagAndfileNameMap = PropertiesUtil.GetAllProperties("flagAndfilePath.properties");
+            for (String key : flagAndfileNameMap.keySet()) {
+                if (key.equals(onlyFlag)) {
+                    filePathName = flagAndfileNameMap.get(key);
+                }
+            }
             //获取密钥
-            Map<String,SecretKey> keyMap=( Map<String,SecretKey>)FileUtil.readDate(filePathName);
+            Map<String, SecretKey> keyMap = (Map<String, SecretKey>) FileUtil.readDate(filePathName);
 
             cipher.init(Cipher.DECRYPT_MODE, keyMap.get(onlyFlag));
             byte[] result = cipher.doFinal(HexBin.decode(pwCode));
-            String password=new String(result);
-            System.out.println(pwCode+" 解密后的数据："+password);
+            String password = new String(result);
+            System.out.println(pwCode + " 解密后的数据：" + password);
             return password;
         }
     }
 
 
-
-
-
     /**
      * 保存key(密钥)和pw以Map形式保存到三个文件中(唯一标识-key密钥, 唯一标识-pw(保存到配置文件中), 唯一标识-pwCode(保存到配置文件中))
+     *
      * @param secretKey 密钥
      * @param password  密码
      * @param pwCode    处理后的加密数据
      */
-    private static void savakeyAndpw(SecretKey secretKey, String password,String pwCode) throws IOException {
+    private static void savakeyAndpw(SecretKey secretKey, String password, String pwCode) throws IOException {
 
         //唯一标识
-        String onlyFlag=RandomUtil.UUID();
+        String onlyFlag = RandomUtil.UUID();
         HashMap<String, String> mapA = new HashMap<String, String>() {
             {
                 put(onlyFlag, password);
             }
         };
         //保存唯一标识-pw(保存到配置文件中)
-        PropertiesUtil.updateProperties("flagAndpw.properties",mapA);
+        PropertiesUtil.updateProperties("flagAndpw.properties", mapA);
 
         HashMap<String, String> mapB = new HashMap<String, String>() {
             {
@@ -214,18 +221,18 @@ public final class PasswordUtil  {
             }
         };
         //保存唯一标识-pw(保存到配置文件中)
-        PropertiesUtil.updateProperties("flagAndpwCode.properties",mapB);
+        PropertiesUtil.updateProperties("flagAndpwCode.properties", mapB);
 
 
         //保存唯一标识-密钥所在文件名称到配置文件中
-        String filePathName="flagAndSecretKey_"+onlyFlag+".text";
+        String filePathName = "flagAndSecretKey_" + onlyFlag + ".text";
         HashMap<String, String> mapC = new HashMap<String, String>() {
             {
                 put(onlyFlag, filePathName);
             }
         };
 
-        PropertiesUtil.updateProperties("flagAndfilePath.properties",mapC);
+        PropertiesUtil.updateProperties("flagAndfilePath.properties", mapC);
 
 
         HashMap<String, SecretKey> mapD = new HashMap<String, SecretKey>() {
@@ -235,42 +242,21 @@ public final class PasswordUtil  {
         };
 
 
-
         //保存唯一标识-key 到磁盘文件中
-        FileUtil.writeDate(filePathName,mapD);
+        FileUtil.writeDate(filePathName, mapD);
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-    public static void main(String[] args) throws NoSuchPaddingException, NoSuchAlgorithmException, IOException, BadPaddingException, IllegalBlockSizeException, InvalidKeyException, ClassNotFoundException, InvalidKeySpecException {
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    public static void main(String[] args) throws NoSuchPaddingException, NoSuchAlgorithmException, IOException, BadPaddingException, IllegalBlockSizeException, InvalidKeyException, InvalidKeySpecException {
+        PasswordUtil.DES.encrypt("12312341");
     }
 
 
 }
+
+
+
+
+
+
+
+
