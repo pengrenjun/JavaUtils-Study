@@ -1,4 +1,4 @@
-package com.guavaStudy;
+package com.guavaStudy.base;
 
 
 import com.google.common.base.Optional;
