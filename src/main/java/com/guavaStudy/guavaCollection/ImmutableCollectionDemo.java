@@ -67,11 +67,17 @@ public class ImmutableCollectionDemo {
       immutableSet3.forEach(System.out::println);
       System.out.println("-----------------------");
 
+
       //此外，对有序不可变集合来说，排序是在构造集合的时候完成的，如：
       ImmutableSortedSet<String> sortedSet = ImmutableSortedSet.of("a", "c", "b", "a", "d", "b","c");
       UnmodifiableIterator<String> iterator = sortedSet.iterator();
       while(iterator.hasNext()){
           System.out.println(iterator.next());//a, b, c, d
       }
+
+      System.out.println("-----------------------");
+      //asList视图
+      ImmutableList<String> immutableList1 = sortedSet.asList();
+      System.out.println(immutableList1.toString());
   }
 }
