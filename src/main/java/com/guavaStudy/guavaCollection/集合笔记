@@ -100,3 +100,84 @@ TreeMultiset 实现 SortedMultiset 接口。在撰写本文档时，ImmutableSor
 SortedMultiset 是 Multiset 接口的变种，它支持高效地获取指定范围的子集。比方说，你可以用 latencies.sub
 Multiset(0,BoundType.CLOSED, 100, BoundType.OPEN).size()来统计你的站点中延迟在 100 毫秒以内的
 访问，然后把这个值和 latencies.size()相比，以获取这个延迟水平在总体访问中的比例。
+
+
+##Multimap
+每个有经验的 Java 程序员都在某处实现过 Map<K, List>或 Map<K, Set>，并且要忍受这个结构的笨拙。例
+如，Map<K, Set>通常用来表示非标定有向图。Guava 的 Multimap 可以很容易地把一个键映射到多个值。换
+句话说，Multimap 是把键映射到任意多个值的一般方式。
+
+可以用两种方式思考 Multimap 的概念：”键-单个值映射”的集合：
+a -> 1 a -> 2 a ->4 b -> 3 c -> 5
+或者”键-值集合映射”的映射：
+a -> [1, 2, 4] b -> 3 c -> 5
+一般来说，Multimap 接口应该用第一种方式看待，但 asMap()视图返回 Map<K, Collection>，让你可以按另
+一种方式看待 Multimap。重要的是，不会有任何键映射到空集合：一个键要么至少到一个值，要么根本就不在
+Multimap 中。
+
+很少会直接使用 Multimap 接口，更多时候你会用 ListMultimap 或 SetMultimap 接口，它们分别把键映射到 List 或 Set。
+
+>>修改 Multimap
+Multimap.get(key)以集合形式返回键所对应的值视图，即使没有任何对应的值，也会返回空集合。ListMultimap.get(key)返回 List，SetMultimap.get(key)返回 Set。
+** 对值视图集合进行的修改最终都会反映到底层的 Multimap
+其他（更直接地）修改 Multimap 的方法有：
+方法签名                         描述                                       等价于
+put(K, V)                    添加键到单个值的映射                      multimap.get(key).add(value)
+putAll(K, Iterable<V>)      依次添加键到多个值的映射                   Iterables.addAll(multimap.get(key), values)
+remove(K, V) 移除键到值的映射；如果有这样的键值并成功移除，返回 true。        multimap.get(key).remove(value)
+removeAll(K) 清除键对应的所有值，返回的集合包含所有之前映射到 K 的值，但修改这个集合就不会影响 Multimap 了。multimap.get(key).clear()
+replaceValues(K, Iterable<V>)   清除键对应的所有值，并重新把 key 关联到 Iterable 中的每个元素。返回的集合包含所有之前映射到 K 的值。 multimap.get(key).clear(); Iterables.addAll(multimap.get(key), values)
+
+>>Multimap 的视图
+Multimap 还支持若干强大的视图：
+• asMap为 Multimap<K, V>提供 Map<K,Collection>形式的视图。返回的 Map 支持 remove 操作，并且
+会反映到底层的 Multimap，但它不支持 put 或 putAll 操作。更重要的是，如果你想为 Multimap 中没有的
+键返回 null，而不是一个新的、可写的空集合，你就可以使用 asMap().get(key)。（你可以并且应当把 as
+Map.get(key)返回的结果转化为适当的集合类型——如 SetMultimap.asMap.get(key)的结果转为 Set，L
+istMultimap.asMap.get(key)的结果转为 List——Java 类型系统不允许 ListMultimap 直接为 asMap.ge
+t(key)返回 List——译者注：也可以用 Multimaps 中的 asMap 静态方法帮你完成类型转换）
+
+• entries用 Collection<Map.Entry<K, V>>返回 Multimap 中所有”键-单个值映射”——包括重复
+键。（对 SetMultimap，返回的是 Set）
+• keySet用 Set 表示 Multimap 中所有不同的键。
+• keys用 Multiset 表示 Multimap 中的所有键，每个键重复出现的次数等于它映射的值的个数。可以从这个
+Multiset 中移除元素，但不能做添加操作；移除操作会反映到底层的 Multimap。
+• values()用一个”扁平”的Collection包含 Multimap 中的所有值。这有一点类似于 Iterables.concat(multi
+map.asMap().values())，但它直接返回了单个 Collection，而不像 multimap.asMap().values()那样是
+按键区分开的 Collection。
+
+**>>Multimap 不是 Map
+Multimap<K, V>不是 Map<K,Collection>，虽然某些 Multimap 实现中可能使用了 map。它们之间的显著区
+别包括：
+• Multimap.get(key)总是返回非 null、但是可能空的集合。这并不意味着 Multimap 为相应的键花费内存创
+建了集合，而只是提供一个集合视图方便你为键增加映射值——译者注：如果有这样的键，返回的集合只是
+包装了 Multimap 中已有的集合；如果没有这样的键，返回的空集合也只是持有 Multimap 引用的栈对
+象，让你可以用来操作底层的 Multimap。因此，返回的集合不会占据太多内存，数据实际上还是存放在 Mu
+ltimap 中。
+• 如果你更喜欢像 Map 那样，为 Multimap 中没有的键返回 null，请使用 asMap()视图获取一个 Map<K, C
+ollection>。（或者用静态方法 Multimaps.asMap()为 ListMultimap 返回一个 Map<K, List>。对于 Set
+Multimap 和 SortedSetMultimap，也有类似的静态方法存在）
+• 当且仅当有值映射到键时，Multimap.containsKey(key)才会返回 true。尤其需要注意的是，如果键 k 之前
+映射过一个或多个值，但它们都被移除后，Multimap.containsKey(key)会返回 false。
+• Multimap.entries()返回 Multimap 中所有”键-单个值映射”——包括重复键。如果你想要得到所有”键-
+值集合映射”，请使用 asMap().entrySet()。
+• Multimap.size()返回所有”键-单个值映射”的个数，而非不同键的个数。要得到不同键的个数，请改用 M
+ultimap.keySet().size()。
+
+>>Multimap 的各种实现
+Multimap 提供了多种形式的实现。在大多数要使用 Map<K, Collection>的地方，你都可以使用它们：
+实现                                  键行为类似                                   值行为类似
+
+ArrayListMultimap                   HashMap                                     ArrayList
+HashMultimap                        HashMap                                     HashSet
+LinkedListMultimap*                 LinkedHashMap*                              LinkedList*
+LinkedHashMultimap**                LinkedHashMap                               LinkedHashMap
+TreeMultimap                        TreeMap                                     TreeSet
+ImmutableListMultimap               ImmutableMap                                ImmutableList
+ImmutableSetMultimap                ImmutableMap                                ImmutableSet
+
+除了两个不可变形式的实现，其他所有实现都支持 null 键和 null 值
+*LinkedListMultimap.entries()保留了所有键和值的迭代顺序。
+**LinkedHashMultimap 保留了映射项的插入顺序，包括键插入的顺序，以及键映射的所有值的插入顺序。
+请注意，并非所有的 Multimap 都和上面列出的一样，使用 Map<K, Collection>来实现（特别是，一些 Multimap 实现用了自定义的 hashTable，以最小化开销）
+如果你想要更大的定制化，请用 Multimaps.newMultimap(Map, Supplier)或 list 和 set 版本，使用自定义的 Collection、List 或 Set 实现 Multimap。
