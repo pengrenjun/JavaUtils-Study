@@ -1,0 +1,127 @@
+Functions[函数]和 Predicates[断言]
+本节只讨论直接与 Function 和 Predicate 打交道的 Guava 功能。一些其他工具类也和”函数式风格”相
+关，例如 Iterables.concat(Iterable)，和其他用常量时间返回视图的方法。尝试看看 2.3 节的集合工具类。
+Guava 提供两个基本的函数式接口：
+• Function<A, B>，它声明了单个方法 B apply(A input)。Function 对象通常被预期为引用透明的——没有
+副作用——并且引用透明性中的”相等”语义与 equals 一致，如 a.equals(b)意味着 function.apply(a).eq
+uals(function.apply(b))。
+• Predicate，它声明了单个方法 boolean apply(T input)。Predicate 对象通常也被预期为无副作用函
+数，并且”相等”语义与 equals 一致。
+
+操作 Functions 和 Predicates
+Functions 提供简便的 Function 构造和操作方法，包括：
+forMap(Map<A, B>) compose(Function<B, C>, Function<A, B>) constant(T)
+identity() toStringFunction()
+
+相应地，Predicates 提供了更多构造和处理 Predicate 的方法，下面是一些例子
+instanceOf(Class) assignableFrom(Class) contains(Pattern)
+in(Collection) isNull() alwaysFalse()
+alwaysTrue() equalTo(Object) compose(Predicate, Function)
+and(Predicate...) or(Predicate...) not(Predicate)
+
+
+使用函数式编程
+
+截至 JDK7，命令式代码仍应是默认和第一选择。不应该随便使用函数式风格，除非你绝对确定以下两点之一：
+• 使用函数式风格以后，整个工程的代码行会净减少。在上面的例子中，函数式版本用了 11 行， 命令式代码
+用了 6 行，把函数的定义放到另一个文件或常量中，并不能帮助减少总代码行。
+• 为了提高效率，转换集合的结果需要懒视图，而不是明确计算过的集合。此外，确保你已经阅读和重读了 Eff
+ective Java 的第 55 条，并且除了阅读本章后面的说明，你还真正做了性能测试并且有测试数据来证明函数
+式版本更快。
+
+Guava 提供了很多工具方法，以便用 Function 或 Predicate 操作集合。这些方法通常可以在集合工具类找
+到，如 Iterables，Lists，Sets，Maps，Multimaps 等。
+断言
+断言的最基本应用就是过滤集合。所有 Guava 过滤方法都返回”视图”——译者注：即并非用一个新的集合表
+示过滤，而只是基于原集合的视图。
+集合类型                                          过滤方法
+Iterable                            Iterables.filter(Iterable, Predicate)
+                                    FluentIterable.filter(Predicate)
+Iterator                            Iterators.filter(Iterator, Predicate)
+Collection                          Collections2.filter(Collection, Predicate)
+Set                                 Sets.filter(Set, Predicate)
+SortedSet                           Sets.filter(SortedSet, Predicate)
+Map                                 Maps.filterKeys(Map, Predicate)
+                                    Maps.filterValues(Map, Predicate)
+                                    Maps.filterEntries(Map, Predicate)
+SortedMap                           Maps.filterKeys(SortedMap, Predicate)
+                                    Maps.filterValues(SortedMap, Predicate)
+                                    Maps.filterEntries(SortedMap, Predicate)
+Multimap                            Multimaps.filterKeys(Multimap, Predicate)
+                                    Multimaps.filterValues(Multimap, Predicate)
+                                    Multimaps.filterEntries(Multimap, Predicate)
+
+*List 的过滤视图被省略了，因为不能有效地支持类似 get(int)的操作。请改用 Lists.newArrayList(Collections2.filter(list, predicate))做拷贝过滤
+
+除了简单过滤，Guava 另外提供了若干用 Predicate 处理 Iterable 的工具——通常在 Iterables 工具类中，或
+者是 FluentIterable 的”fluent”（链式调用）方法。
+
+Iterables方法签名                             说明                            另请参见
+boolean all(Iterable, Predicate)        是否所有元素满足断              Iterators.all(Iterator, Predicate)
+                                        言？懒实现：如果发现有           FluentIterable.allMatch(Predicate)
+                                        元素不满足，不会继续迭代
+
+
+
+boolean any(Iterable, Predicate)      是否有任意元素满足元素             Iterators.any(Iterator, Predicate)
+                                      满足断言？懒实现：只会             FluentIterable.anyMatch(Predicate)
+                                      迭代到发现满足的元素
+
+
+
+
+T find(Iterable, Predicate)          循环并返回一个满足元素              Iterators.find(Iterator, Predicate)
+                                     满足断言的元素，如果没              Iterables.find(Iterable, Predicate, T default)
+                                     有则抛出 NoSuchElementException   Iterators.find(Iterator, Predicate,T default)
+
+
+
+
+
+Optional<T> tryFind(Iterable, Predicate) 返回一个满足元素满足断言的元素，若没有则返回
+                                                                Iterators.find(Iterator, Predicate)
+                                                                Iterables.find(Iterable, Predicate,T default)
+                                                                Iterators.find(Iterator, Predicate,T default)
+
+Optional.absent()
+
+indexOf(Iterable, Predicate)           返回第一个满足元素满足
+                                       断言的元素索引值，若没
+                                       有返回-1                             Iterators.indexOf(Iterator, Predicate)
+
+
+removeIf(Iterable, Predicate)          移除所有满足元素满足断
+                                       言的元素，实际调用Iterator.remove()方法 Iterators.removeIf(Iterator, Predicate)
+
+
+>>函数
+到目前为止，函数最常见的用途为转换集合。同样，所有的 Guava 转换方法也返回原集合的视图。
+集合类型                                                     转换方法
+Iterable                        Iterables.transform(Iterable, Function)FluentIterable.transform(Function)
+Iterator                        Iterators.transform(Iterator, Function)
+Collection                      Collections2.transform(Collection, Function)
+List                            Lists.transform(List, Function)
+Map*                            Maps.transformValues(Map, Function)Maps.transformEntries(Map,EntryTransformer)
+SortedMap*                      Maps.transformValues(SortedMap, Function)Maps.transformEntries(SortedMap, EntryTransformer)
+Multimap*                       Multimaps.transformValues(Multimap, Function)Multimaps.transformEntries(Multimap, EntryTransformer)
+ListMultimap*                   Multimaps.transformValues(ListMultimap, Function)Multimaps.transformEntries(ListMultimap, EntryTransformer)
+Table                           Tables.transformValues(Table, Function)
+
+*Map 和 Multimap 有特殊的方法，其中有个 EntryTransformer<K, V1, V2>参数，它可以使用旧的键值来计
+算，并且用计算结果替换旧值。
+
+对 Set 的转换操作被省略了，因为不能有效支持 contains(Object)操作——译者注：懒视图实际上不会全部计算
+转换后的 Set 元素，因此不能高效地支持 contains(Object)。*请改用 Sets.newHashSet(Collections2.trans
+form(set, function))进行拷贝转换。
+
+List<String> names;
+Map<String, Person> personWithName;
+List<Person> people = Lists.transform(names, Functions.forMap(personWithName));
+ListMultimap<String, String> firstNameToLastNames;
+// maps first names to all last names of people with that first name
+ListMultimap<String, String> firstNameToName = Multimaps.transformEntries(firstNameToLastNames,
+new EntryTransformer<String, String, String> () {
+public String transformEntry(String firstName, String lastName) {
+return firstName + " " + lastName;
+}
+});
