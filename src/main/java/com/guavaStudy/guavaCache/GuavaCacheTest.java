@@ -1,7 +1,5 @@
 package com.guavaStudy.guavaCache;
 
-import guavaCache.GuavaCache.AbstractGuavaCache;
-import guavaCache.GuavaCache.DefaultGuavaCacheManage;
 import org.junit.Test;
 
 import java.util.concurrent.ExecutionException;
