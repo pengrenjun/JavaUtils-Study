@@ -3,10 +3,7 @@ package com.guavaStudy.guavaConcurent;
 import com.google.common.util.concurrent.AbstractExecutionThreadService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.Service;
-import com.google.common.util.concurrent.SettableFuture;
 
-import java.io.IOException;
-import java.util.UUID;
 
 /**
  * @Description AbstractExecutionThreadService 通过单线程处理启动、运行、和关闭等操作。
@@ -30,80 +27,87 @@ public class AbstractExecutionThreadServiceDemo {
 
         adbShellProcess.shutDownAdbShellProcess();
     }
-}
 
-class AdbShellProcess{
 
-    private AndroidDevice service;
 
-    public AdbShellProcess(AndroidDevice service) {
-        this.service = service;
+    static class AdbShellProcess{
 
-        //服务添加监听器
-        service.addListener(new Service.Listener() {
-            @Override
-            public void failed(final Service.State from, final Throwable failure) {
-                AdbShellProcess.this.onFail(failure);
-            }
-        }, MoreExecutors.newDirectExecutorService());
+        private AndroidDevice service;
 
-        service.startAsync();
+        public AdbShellProcess(AndroidDevice service) {
+            this.service = service;
 
-    }
+            //服务添加监听器
+            service.addListener(new Service.Listener() {
+                @Override
+                public void failed(final Service.State from, final Throwable failure) {
+                    AdbShellProcess.this.onFail(failure);
+                }
+            }, MoreExecutors.newDirectExecutorService());
 
-    private void onFail(Throwable failure) {
-        System.out.println("启动AndroidDevice出现异常："+failure.toString());
+            service.startAsync();
+
+        }
+
+        private void onFail(Throwable failure) {
+            System.out.println("启动AndroidDevice出现异常："+failure.toString());
+        }
+
+
+        /**
+         * 关闭进程
+         */
+        public void shutDownAdbShellProcess(){
+            System.out.println("准备关闭开启的AndroidDevice");
+
+            //service.stopAsync();
+
+
+            service.triggerShutdown();
+            System.out.println("AndroidDevice已关闭！");
+
+
+        }
     }
 
 
     /**
-     * 关闭进程
+     *创建一个线程、然后在线程内调用run()方法\
+     *
+     * 注意：AbstractExecutionThreadService 通过单线程处理启动、运行、和关闭等操作。
+     * 你必须重载run()方法，同时需要能响应停止服务的请求。具体的实现可以在一个循环内做处理
      */
-    public void shutDownAdbShellProcess(){
-        System.out.println("准备关闭开启的AndroidDevice");
+    static class AndroidDevice extends  AbstractExecutionThreadService {
 
-        //service.stopAsync();
-
-
-        service.triggerShutdown();
-        System.out.println("AndroidDevice已关闭！");
+        private  boolean bl=true;
 
 
-    }
-}
 
-/**
- *创建一个线程、然后在线程内调用run()方法\
- *
- * 注意：AbstractExecutionThreadService 通过单线程处理启动、运行、和关闭等操作。
- * 你必须重载run()方法，同时需要能响应停止服务的请求。具体的实现可以在一个循环内做处理
- */
-class AndroidDevice extends  AbstractExecutionThreadService {
+        @Override
+        protected void run() throws Exception {
 
-    private  boolean bl=true;
+            System.out.println("安卓服务进程"+Thread.currentThread().toString()+">>安卓服务进程启动");
 
-    @Override
-    protected void run() throws Exception {
+            while (isRunning()){
 
-        System.out.println("安卓服务进程"+Thread.currentThread().toString()+">>安卓服务进程启动");
+                int q=0;
 
-        while (isRunning()){
+                while(bl){
 
-            int q=0;
+                    Thread.sleep(1000);
 
-            while(bl){
-
-                Thread.sleep(1000);
-
-                System.out.println(q++);
+                    System.out.println(q++);
+                }
             }
+        }
+
+        @Override
+        protected void triggerShutdown() {
+            bl=false;
         }
     }
 
-    @Override
-    protected void triggerShutdown() {
-        bl=false;
-    }
 }
+
 
 
