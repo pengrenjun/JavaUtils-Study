@@ -1,0 +1,67 @@
+拆分器工厂
+Splitter.on(char) 按单个字符拆分 Splitter.on(‘;’)
+Splitter.on(CharMatcher) 按字符匹配器拆分 Splitter.on(CharMatcher.BREAKIN
+G_WHITESPACE)
+Splitter.on(String) 按字符串拆分 Splitter.on(“, “)
+Splitter.on(Pattern) Splitte
+r.onPattern(String)
+按正则表达式拆分 Splitter.onPattern(“\r?\n”)
+Splitter.fixedLength(int) 按固定长度拆分；最后一段
+可能比给定长度短，但不会为空。
+
+拆分器修饰符
+方法 描述
+omitEmptyStrings() 从结果中自动忽略空字符串
+trimResults() 移除结果字符串的前导空白和尾部空白
+trimResults(CharMatcher) 给定匹配器，移除结果字符串的前导匹配字符和尾部匹配字符
+limit(int) 限制拆分出的字符串数量
+
+如果你想要拆分器返回 List，只要使用 Lists.newArrayList(splitter.split(string))或类似方法
+
+字符匹配器[CharMatcher]
+在以前的 Guava 版本中，StringUtil 类疯狂地膨胀，其拥有很多处理字符串的方法：allAscii、collapse、colla
+pseControlChars、collapseWhitespace、indexOfChars、lastIndexNotOf、numSharedChars、remov
+eChars、removeCrLf、replaceChars、retainAllChars、strip、stripAndCollapse、stripNonDigits。 所
+有这些方法指向两个概念上的问题：
+1. 怎么才算匹配字符？
+2. 如何处理这些匹配字符？
+
+为了收拾这个泥潭，我们开发了 CharMatcher。
+直观上，你可以认为一个 CharMatcher 实例代表着某一类字符，如数字或空白字符。事实上来说，CharMatch
+er 实例就是对字符的布尔判断——CharMatcher 确实也实现了 Predicate——但类似”所有空白字符”或”所
+有小写字母”的需求太普遍了，Guava 因此创建了这一 API。
+然而使用 CharMatcher 的好处更在于它提供了一系列方法，让你对字符作特定类型的操作：修剪[trim]、折叠[c
+ollapse]、移除[remove]、保留[retain]等等。CharMatcher 实例首先代表概念 1：怎么才算匹配字符？然后它
+还提供了很多操作概念 2：如何处理这些匹配字符？这样的设计使得 API 复杂度的线性增加可以带来灵活性和功
+能两方面的增长
+
+获取字符匹配器
+CharMatcher 中的常量可以满足大多数字符匹配需求：
+ANY NONE WHITESPACE BREAKING_WHITESPACE
+INVISIBLE DIGIT JAVA_LETTER JAVA_DIGIT
+JAVA_LETTER_OR_DIGIT JAVA_ISO_CONTROL JAVA_LOWER_CASE JAVA_UPPER_CASE
+ASCII SINGLE_WIDTH
+
+其他获取字符匹配器的常见方法包括：
+方法 描述
+anyOf(CharSequence) 枚举匹配字符。如 CharMatcher.anyOf(“aeiou”)匹配小写英语元音
+is(char) 给定单一字符匹配。
+inRange(char, char) 给定字符范围匹配，如 CharMatcher.inRange(‘a’, ‘z’)
+
+使用字符匹配器
+CharMatcher 提供了多种多样的方法操作 CharSequence 中的特定字符。其中最常用的罗列如下
+方法 描述
+collapseFrom(CharSequence, char) 把每组连续的匹配字符替换为特定字符。如 WHITESPACE.collapseFrom(string, ‘ ‘)把字符串中的连续空白字符替换为单个空格。
+matchesAllOf(CharSequence) 测试是否字符序列中的所有字符都匹配。
+removeFrom(CharSequence) 从字符序列中移除所有匹配字符。
+retainFrom(CharSequence) 在字符序列中保留匹配字符，移除其他字符。
+trimFrom(CharSequence) 移除字符序列的前导匹配字符和尾部匹配字符。
+replaceFrom(CharSequence, CharSequence)用特定字符序列替代匹配字符。
+
+大小写格式[CaseFormat]  CaseFormat实现的方式可以参考
+格式 范例
+LOWER_CAMEL lowerCamel
+LOWER_HYPHEN lower-hyphen
+LOWER_UNDERSCORE lower_underscore
+UPPER_CAMEL UpperCamel
+UPPER_UNDERSCORE UPPER_UNDERSCORE
